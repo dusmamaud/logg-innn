@@ -647,27 +647,12 @@
       document.addEventListener("DOMContentLoaded", () => {
         new CinematicSlider();
       });
-
-      // Block direct access
-if (document.referrer === '') {
-    window.location.href = 'https://dusmamaud.github.io/logg-innn/';
-}
-
-// Change URL when page loads
 window.onload = function() {
-    window.history.pushState({}, '', '/logg-innn/working-Day-3773-yegg.html');
+    // Change URL without reloading the page
+    let newURL = '/logg-innn/working-Day-3773-yegg.html';
+    window.history.pushState({}, '', newURL);
 }
 
-// Prevent back button and keep fake URL
-window.history.pushState(null, null, window.location.href);
-window.onpopstate = function () {
-    window.history.pushState(null, null, window.location.href);
-};
-
-// If someone tries to access original URL, redirect them
-if (window.location.href.includes('AdminDashboard.html')) {
-    window.location.href = 'https://dusmamaud.github.io/logg-innn/';
-}
 
     </script>
   </body>

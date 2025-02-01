@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cinematic Slider</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
+
+      :root {
+        --primary-bg: #000000;
+        --secondary-bg: #111111;
+        --accent-color: #ff3d00;
+        --text-primary: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.7);
+        --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+        --slider-height: 85vh;
+        --border-radius: 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Outfit", sans-serif;
+      }
+
+      body {
+        background: var(--primary-bg);
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        color: var(--text-primary);
+      }
+
+      .cinematic-slider {
+        width: 100%;
+        max-width: 1400px;
+        height: var(--slider-height);
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--border-radius);
+        background: var(--secondary-bg);
+      }
+
+      .slides-wrapper {
+        position: relative;
+        height: 100%;
+        width: 100%;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: 1s var(--transition-timing);
+      }
+
+      .slide.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .slide-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .slide-bg {
+        position: absolute;
+        inset: 0;
+        transform: scale(1.2);
+        transition: transform 1.5s var(--transition-timing);
+      }
+
+      .slide.active .slide-bg {
+        transform: scale(1);
+      }
+
+      .slide-bg img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.7);
+        transform: scale(1);
+        transition: transform 8s linear;
+      }
+
+      .slide.active .slide-bg img {
+        transform: scale(1.1);
+      }
+
+      .slide-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 4rem;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 1s var(--transition-timing);
+      }
+
+      .slide.active .slide-content {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .slide-subtitle {
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 1rem;
+        color: var(--accent-color);
+      }
+
+      .slide-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+      }
+
+      .slide-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 600px;
+        margin-bottom: 2rem;
+        color: var(--text-secondary);
+      }
+
+      .slide-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .slide-link:hover {
+        color: var(--accent-color);
+      }
+
+      .slide-link i {
+        font-size: 1.5rem;
+      }
+
+      .slider-nav {
+        position: absolute;
+        right: 4rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        z-index: 10;
+      }
+
+      .nav-indicator {
+        width: 2px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .nav-indicator::before {
+        content: "";
+        position: absolute;
+        left: -4px;
+        top: 50%;
+        width: 10px;
+        height: 10px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        transform: translateY(-50%) scale(0);
+        transition: transform 0.3s ease;
+      }
+
+      .nav-indicator.active {
+        background: var(--accent-color);
+      }
+
+      .nav-indicator.active::before {
+        transform: translateY(-50%) scale(1);
+      }
+
+      .slider-controls {
+        position: absolute;
+        left: 4rem;
+        bottom: 4rem;
+        display: flex;
+        gap: 2rem;
+        z-index: 10;
+      }
+
+      .control-button {
+        width: 60px;
+        height: 60px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
+
+      .control-button:hover {
+        background: var(--accent-color);
+        transform: scale(1.1);
+      }
+
+      .slide-progress {
+        position: absolute;
+        top: 4rem;
+        left: 4rem;
+        font-size: 2rem;
+        font-weight: 700;
+        z-index: 10;
+        opacity: 0.8;
+      }
+
+      .slide-number {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--accent-color);
+      }
+
+      .total-slides {
+        font-size: 1.5rem;
+        opacity: 0.5;
+      }
+
+      @media (max-width: 1024px) {
+        .slide-title {
+          font-size: 2.5rem;
+        }
+
+        .slide-content {
+          padding: 3rem;
+        }
+
+        .slider-controls {
+          left: 3rem;
+          bottom: 3rem;
+        }
+
+        .slide-progress {
+          left: 3rem;
+          top: 3rem;
+        }
+
+        .slider-nav {
+          right: 3rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .slide-subtitle {
+          font-size: 1rem;
+        }
+
+        .slide-title {
+          font-size: 2rem;
+        }
+
+        .slide-description {
+          font-size: 1rem;
+        }
+
+        .control-button {
+          width: 50px;
+          height: 50px;
+        }
+
+        .slide-progress {
+          font-size: 1.5rem;
+        }
+
+        .slide-number {
+          font-size: 3rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .cinematic-slider {
+          border-radius: 20px;
+        }
+
+        .slide-content {
+          padding: 2rem;
+        }
+
+        .slide-title {
+          font-size: 1.5rem;
+        }
+
+        .slider-controls {
+          left: 2rem;
+          bottom: 2rem;
+        }
+
+        .slide-progress {
+          left: 2rem;
+          top: 2rem;
+        }
+
+        .slider-nav {
+          right: 2rem;
+        }
+
+        .control-button {
+          width: 40px;
+          height: 40px;
+          font-size: 1rem;
+        }
+      }
+
+      .slide-overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at center,
+          transparent 40%,
+          rgba(0, 0, 0, 0.4)
+        );
+        pointer-events: none;
+      }
+
+      .cinematic-slider::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          transparent 0%,
+          rgba(0, 0, 0, 0.03) 50%,
+          transparent 100%
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        opacity: 0.5;
+        mix-blend-mode: color-burn;
+      }
+
+      @keyframes grain {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        10% {
+          transform: translate(-5%, -5%);
+        }
+        30% {
+          transform: translate(3%, -2%);
+        }
+        50% {
+          transform: translate(12%, 9%);
+        }
+        70% {
+          transform: translate(9%, 4%);
+        }
+        90% {
+          transform: translate(-1%, 7%);
+        }
+      }
+
+      .grain-overlay {
+        position: absolute;
+        inset: -150%;
+        background-image: url("data:image/png;base64,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");
+        opacity: 0.15;
+        animation: grain 8s steps(10) infinite;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cinematic-slider">
+      <div class="slides-wrapper">
+        <div class="slide active">
+          <div class="slide-inner">
+            <div class="slide-bg">
+              <img
+                src="https://storage.googleapis.com/a1aa/image/3433b20a-cf02-4da3-9b9a-6c015ea81386.jpeg"
+                alt="Natural Wonder"
+              />
+            </div>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+              <div class="slide-subtitle">Featured</div>
+              <h2 class="slide-title">Natural Wonder</h2>
+              <p class="slide-description">
+                Experience the breathtaking beauty of untamed landscapes and
+                majestic vistas that will leave you in awe of nature's grandeur.
+              </p>
+              <a href="#" class="slide-link">
+                Discover Story <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide">
+          <div class="slide-inner">
+            <div class="slide-bg">
+              <img
+                src="https://storage.googleapis.com/a1aa/image/ca16fb3b-85d4-485d-bbb6-57e64c4ecda1.jpeg"
+                alt="Urban Dreams"
+              />
+            </div>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+              <div class="slide-subtitle">Featured</div>
+              <h2 class="slide-title">Urban Dreams</h2>
+              <p class="slide-description">
+                Discover the hidden gems and architectural marvels that define
+                our modern cities and urban landscapes.
+              </p>
+              <a href="#" class="slide-link">
+                Explore More <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide">
+          <div class="slide-inner">
+            <div class="slide-bg">
+              <img
+                src="https://storage.googleapis.com/a1aa/image/5dd59bcc-2629-45b2-84a4-219427f785e3.jpeg"
+                alt="Mountain Tales"
+              />
+            </div>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+              <div class="slide-subtitle">Featured</div>
+              <h2 class="slide-title">Mountain Tales</h2>
+              <p class="slide-description">
+                Embark on thrilling journeys through rugged peaks and scenic
+                mountain ranges that touch the sky.
+              </p>
+              <a href="#" class="slide-link">
+                Start Journey <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide">
+          <div class="slide-inner">
+            <div class="slide-bg">
+              <img
+                src="https://storage.googleapis.com/a1aa/image/05484542-2333-4b29-a62b-b20a951b932b.jpeg"
+                alt="Modern Design"
+              />
+            </div>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+              <div class="slide-subtitle">Featured</div>
+              <h2 class="slide-title">Modern Design</h2>
+              <p class="slide-description">
+                Witness the perfect blend of form and function in contemporary
+                architectural masterpieces.
+              </p>
+              <a href="#" class="slide-link">
+                Learn More <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grain-overlay"></div>
+
+      <div class="slide-progress">
+        <span class="slide-number">01</span>
+        <span class="total-slides">/04</span>
+      </div>
+
+      <div class="slider-nav"></div>
+
+      <div class="slider-controls">
+        <button class="control-button prev">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="control-button next">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      class CinematicSlider {
+        constructor() {
+          this.currentSlide = 0;
+          this.slides = document.querySelectorAll(".slide");
+          this.totalSlides = this.slides.length;
+          this.isAnimating = false;
+          this.autoPlayDelay = 5000;
+          this.touchStartX = 0;
+          this.touchEndX = 0;
+
+          this.init();
+        }
+
+        init() {
+          this.createNavigation();
+          this.bindEvents();
+          this.startAutoPlay();
+          this.updateProgress();
+        }
+
+        createNavigation() {
+          const nav = document.querySelector(".slider-nav");
+          for (let i = 0; i < this.totalSlides; i++) {
+            const indicator = document.createElement("div");
+            indicator.classList.add("nav-indicator");
+            if (i === 0) indicator.classList.add("active");
+            indicator.addEventListener("click", () => this.goToSlide(i));
+            nav.appendChild(indicator);
+          }
+          this.indicators = document.querySelectorAll(".nav-indicator");
+        }
+
+        bindEvents() {
+          document
+            .querySelector(".prev")
+            .addEventListener("click", () => this.prevSlide());
+          document
+            .querySelector(".next")
+            .addEventListener("click", () => this.nextSlide());
+          document.addEventListener("keydown", (e) => this.handleKeyboard(e));
+
+          const slider = document.querySelector(".cinematic-slider");
+          slider.addEventListener("touchstart", (e) =>
+            this.handleTouchStart(e)
+          );
+          slider.addEventListener("touchmove", (e) => this.handleTouchMove(e));
+          slider.addEventListener("touchend", () => this.handleTouchEnd());
+        }
+
+        goToSlide(index) {
+          if (this.isAnimating || index === this.currentSlide) return;
+          this.isAnimating = true;
+
+          this.slides[this.currentSlide].classList.remove("active");
+          this.indicators[this.currentSlide].classList.remove("active");
+
+          this.currentSlide = index;
+          this.slides[this.currentSlide].classList.add("active");
+          this.indicators[this.currentSlide].classList.add("active");
+
+          this.updateProgress();
+
+          setTimeout(() => {
+            this.isAnimating = false;
+          }, 1000);
+        }
+
+        nextSlide() {
+          const nextIndex = (this.currentSlide + 1) % this.totalSlides;
+          this.goToSlide(nextIndex);
+        }
+
+        prevSlide() {
+          const prevIndex =
+            (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+          this.goToSlide(prevIndex);
+        }
+
+        startAutoPlay() {
+          this.autoPlayTimer = setInterval(() => {
+            this.nextSlide();
+          }, this.autoPlayDelay);
+        }
+
+        stopAutoPlay() {
+          clearInterval(this.autoPlayTimer);
+        }
+
+        updateProgress() {
+          const number = String(this.currentSlide + 1).padStart(2, "0");
+          document.querySelector(".slide-number").textContent = number;
+        }
+
+        handleTouchStart(e) {
+          this.touchStartX = e.touches[0].clientX;
+          this.stopAutoPlay();
+        }
+
+        handleTouchMove(e) {
+          if (!this.touchStartX) return;
+          this.touchEndX = e.touches[0].clientX;
+          e.preventDefault();
+        }
+
+        handleTouchEnd() {
+          if (!this.touchStartX || !this.touchEndX) return;
+
+          const diff = this.touchStartX - this.touchEndX;
+          const threshold = 50;
+
+          if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+              this.nextSlide();
+            } else {
+              this.prevSlide();
+            }
+          }
+
+          this.touchStartX = null;
+          this.touchEndX = null;
+          this.startAutoPlay();
+        }
+
+        handleKeyboard(e) {
+          switch (e.key) {
+            case "ArrowLeft":
+              this.prevSlide();
+              break;
+            case "ArrowRight":
+              this.nextSlide();
+              break;
+          }
+        }
+      }
+
+      // Initialize slider when DOM is loaded
+      document.addEventListener("DOMContentLoaded", () => {
+        new CinematicSlider();
+      });
+    </script>
+  </body>
+</html>

@@ -85,6 +85,4 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-if (window.location.pathname === "AdminDashboard.html") {
-  window.location.replace("welcome-dus-mamud.html");
-}
+

@@ -86,3 +86,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 
+// Check if user is coming from direct URL
+if (document.referrer === '') {
+    window.location.href = '/logg-innn/'; // Redirect to home page
+}
